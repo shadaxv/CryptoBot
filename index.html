@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pl" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; width: 80%; margin: 0 auto">
+      <div style="width: 50%; flex: 1;">
+        <canvas id="longChart" width="400" height="400"></canvas>
+      </div>
+      <div style="width: 50%; flex: 1;">
+        <canvas id="shortChart" width="400" height="400"></canvas>
+      </div>
+    </div>
+
+    <script>
+    var ctx = document.getElementById("longChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["2015-01", "2015-07", "2016-01", "2016-07", "2017-01", "2017-07", "2018-01", "2018-07"],
+            datasets: [{
+                label: 'Przegrane',
+                data: [0, 2, 2, 8, 8, 20, 24, 30],
+                backgroundColor: [
+                      'rgba(255, 138, 128, 1)'
+                ],
+                borderColor: [
+                    '#FF1744'
+                ],
+                borderWidth: 2,
+                fill: true
+            }, {
+                label: 'Wygrane',
+                data: [0, 3, 8, 12, 13, 35, 36, 41],
+                backgroundColor: [
+                    'rgba(185, 246, 202, 1)'
+                ],
+                borderColor: [
+                    '#00C853'
+                ],
+                borderWidth: 2,
+                fill: true
+            }, {
+                label: 'Liczba longów',
+                data: [0, 5, 10, 20, 21, 55, 60, 71],
+                backgroundColor: [
+                    '#81D4FA'
+                ],
+                borderColor: [
+                    '#01579B'
+                ],
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+    var ctx2 = document.getElementById("shortChart").getContext('2d');
+    var myChart2 = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ["2015-01", "2015-07", "2016-01", "2016-07", "2017-01", "2017-07", "2018-01", "2018-07"],
+            datasets: [{
+                label: 'Przegrane',
+                data: [0, 2, 2, 8, 8, 20, 24, 30],
+                backgroundColor: [
+                      'rgba(255, 138, 128, 1)'
+                ],
+                borderColor: [
+                    '#FF1744'
+                ],
+                borderWidth: 2,
+                fill: true
+            }, {
+                label: 'Wygrane',
+                data: [0, 3, 8, 12, 13, 35, 36, 41],
+                backgroundColor: [
+                    'rgba(185, 246, 202, 1)'
+                ],
+                borderColor: [
+                    '#00C853'
+                ],
+                borderWidth: 2,
+                fill: true
+            }, {
+                label: 'Liczba shortów',
+                data: [0, 5, 10, 20, 21, 55, 60, 71],
+                backgroundColor: [
+                    '#81D4FA'
+                ],
+                borderColor: [
+                    '#01579B'
+                ],
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+    </script>
+
+  </body>
+</html>
