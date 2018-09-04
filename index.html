@@ -112,15 +112,6 @@
     dateRanges = longDateRanges.concat(shortDateRanges);
     dateRanges.sort();
 
-    console.log(countLongWins);
-    console.log(countLongLosses);
-    console.log(countShortWins);
-    console.log(countShortLosses);
-    console.log(Math.max(...countLongWins));
-    console.log(Math.max(...countLongLosses));
-    console.log(Math.max(...countShortWins));
-    console.log(Math.max(...countShortLosses));
-
     var ctx = document.getElementById("longChart").getContext('2d');
     var myChart = new Chart(ctx, {
       type: 'line',
@@ -328,7 +319,7 @@
       options: {
         title: {
           display: true,
-          text: 'SHORTY'
+          text: 'BILANS | KAPITAŁ $1000 na shorty i longi'
         },
         scales: {
           yAxes: [{
