@@ -34,15 +34,19 @@
     let longWins = [];
     let allLongs = [];
     let longsRatio = [];
+    let countLongLosses = [0];
+    let countLongWins = [0];
 
     let shortDateRanges = [];
     let shortLosses = [];
     let shortWins = [];
     let allShorts = [];
     let shortsRatio = [];
+    let countShortLosses = [0];
+    let countShortWins = [0];
 
-    let longsBalance = [1000.0];
-    let shortsBalance = [1000.0];
+    let longsBalance = [100];
+    let shortsBalance = [100];
     let riskPerTrade = 0.05;
     let leverage = 50.0;
     let stopFees = 0.0005;
@@ -55,12 +59,20 @@
         longLosses.push(longLosses[longLosses.length - 1] + 1 || 0);
         longWins.push(longWins[longWins.length - 1] || 0);
         longsBalance.push(longsBalance[longsBalance.length - 1]);
-        longsBalance.push(longsBalance[longsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - stopFees)));
+        longsBalance.push(longsBalance[longsBalance.length - 1] + (100 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - stopFees)));
+        countLongLosses[countLongLosses.length - 1]++;
+        countLongWins.push(0);
       } else if (value.result == "win") {
         longWins.push(longWins[longWins.length - 1] + 1 || 0);
         longLosses.push(longLosses[longLosses.length - 1] || 0);
         longsBalance.push(longsBalance[longsBalance.length - 1]);
-        longsBalance.push(longsBalance[longsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - takeFees)));
+        longsBalance.push(longsBalance[longsBalance.length - 1] + (100 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - takeFees)));
+        countLongWins[countLongWins.length - 1]++;
+        countLongLosses.push(0);
+      }
+
+      if (longsBalance[longsBalance.length - 1] < 0) {
+        longsBalance[longsBalance.length - 1] == 0;
       }
 
       longsRatio.push(longWins[longWins.length - 1] / (longWins[longWins.length - 1] + longLosses[longLosses.length - 1]));
@@ -75,13 +87,20 @@
         shortLosses.push(shortLosses[shortLosses.length - 1] + 1 || 0);
         shortWins.push(shortWins[shortWins.length - 1] || 0);
         shortsBalance.push(shortsBalance[shortsBalance.length - 1]);
-        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - stopFees)));
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (100 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - stopFees)));
+        countShortLosses[countShortLosses.length - 1]++;
+        countShortWins.push(0);
       } else if (value.result == "win") {
         shortWins.push(shortWins[shortWins.length - 1] + 1 || 0);
         shortLosses.push(shortLosses[shortLosses.length - 1] || 0);
         shortsBalance.push(shortsBalance[shortsBalance.length - 1]);
-        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - takeFees)));
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (100 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - takeFees)));
+        countShortWins[countShortWins.length - 1]++;
+        countShortLosses.push(0);
+      }
 
+      if (shortsBalance[shortsBalance.length - 1] < 0) {
+        shortsBalance[shortsBalance.length - 1] == 0;
       }
 
       shortsRatio.push(shortWins[shortWins.length - 1] / (shortWins[shortWins.length - 1] + shortLosses[shortLosses.length - 1]));
@@ -92,6 +111,15 @@
 
     dateRanges = longDateRanges.concat(shortDateRanges);
     dateRanges.sort();
+
+    console.log(countLongWins);
+    console.log(countLongLosses);
+    console.log(countShortWins);
+    console.log(countShortLosses);
+    console.log(Math.max(...countLongWins));
+    console.log(Math.max(...countLongLosses));
+    console.log(Math.max(...countShortWins));
+    console.log(Math.max(...countShortLosses));
 
     var ctx = document.getElementById("longChart").getContext('2d');
     var myChart = new Chart(ctx, {
