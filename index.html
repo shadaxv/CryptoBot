@@ -1,123 +1,318 @@
 <!DOCTYPE html>
 <html lang="pl" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title></title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js" charset="utf-8"></script>
-  </head>
-  <body>
-    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; width: 80%; margin: 0 auto">
-      <div style="width: 50%; flex: 1;">
-        <canvas id="longChart" width="400" height="400"></canvas>
-      </div>
-      <div style="width: 50%; flex: 1;">
-        <canvas id="shortChart" width="400" height="400"></canvas>
-      </div>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js" charset="utf-8"></script>
+  <script src="data.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; width: 70%; margin: 0 auto">
+    <div style="width: 50%; flex: 1;">
+      <canvas id="longChart" width="400" height="400"></canvas>
     </div>
+    <div style="width: 50%; flex: 1;">
+      <canvas id="shortChart" width="400" height="400"></canvas>
+    </div>
+    <div style="width: 50%; flex: 1;">
+      <canvas id="longChart2" width="400" height="400"></canvas>
+    </div>
+    <div style="width: 50%; flex: 1;">
+      <canvas id="shortChart2" width="400" height="400"></canvas>
+    </div>
+    <div style="width: 50%; flex: 1;">
+      <canvas id="balanceChart" width="400" height="400"></canvas>
+    </div>
+  </div>
 
-    <script>
+  <script>
+    let longDateRanges = [];
+    let longLosses = [];
+    let longWins = [];
+    let allLongs = [];
+    let longsRatio = [];
+
+    let shortDateRanges = [];
+    let shortLosses = [];
+    let shortWins = [];
+    let allShorts = [];
+    let shortsRatio = [];
+
+    let longsBalance = [1000.0];
+    let shortsBalance = [1000.0];
+    let riskPerTrade = 0.05;
+    let leverage = 50.0;
+    let stopFees = 0.0005;
+    let takeFees = -0.0005;
+    let dateRanges = [];
+
+    function getLongsData(value) {
+      longDateRanges.push(value.entryDate);
+      if (value.result == "loss") {
+        longLosses.push(longLosses[longLosses.length - 1] + 1 || 0);
+        longWins.push(longWins[longWins.length - 1] || 0);
+        longsBalance.push(longsBalance[longsBalance.length - 1]);
+        longsBalance.push(longsBalance[longsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - stopFees)));
+      } else if (value.result == "win") {
+        longWins.push(longWins[longWins.length - 1] + 1 || 0);
+        longLosses.push(longLosses[longLosses.length - 1] || 0);
+        longsBalance.push(longsBalance[longsBalance.length - 1]);
+        longsBalance.push(longsBalance[longsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.exitPrice / value.entryPrice - 1 - takeFees)));
+      }
+
+      longsRatio.push(longWins[longWins.length - 1] / (longWins[longWins.length - 1] + longLosses[longLosses.length - 1]));
+      allLongs.push(allLongs[allLongs.length - 1] + 1 || 0);
+    }
+
+    longs.list.forEach(getLongsData);
+
+    function getShortsData(value) {
+      shortDateRanges.push(value.entryDate);
+      if (value.result == "loss") {
+        shortLosses.push(shortLosses[shortLosses.length - 1] + 1 || 0);
+        shortWins.push(shortWins[shortWins.length - 1] || 0);
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1]);
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - stopFees)));
+      } else if (value.result == "win") {
+        shortWins.push(shortWins[shortWins.length - 1] + 1 || 0);
+        shortLosses.push(shortLosses[shortLosses.length - 1] || 0);
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1]);
+        shortsBalance.push(shortsBalance[shortsBalance.length - 1] + (1000 * riskPerTrade * leverage * (value.entryPrice / value.exitPrice - 1 - takeFees)));
+
+      }
+
+      shortsRatio.push(shortWins[shortWins.length - 1] / (shortWins[shortWins.length - 1] + shortLosses[shortLosses.length - 1]));
+      allShorts.push(allShorts[allShorts.length - 1] + 1 || 0);
+    }
+
+    shorts.list.forEach(getShortsData);
+
+    dateRanges = longDateRanges.concat(shortDateRanges);
+    dateRanges.sort();
+
     var ctx = document.getElementById("longChart").getContext('2d');
     var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["2015-01", "2015-07", "2016-01", "2016-07", "2017-01", "2017-07", "2018-01", "2018-07"],
-            datasets: [{
-                label: 'Przegrane',
-                data: [0, 2, 2, 8, 8, 20, 24, 30],
-                backgroundColor: [
-                      'rgba(255, 138, 128, 1)'
-                ],
-                borderColor: [
-                    '#FF1744'
-                ],
-                borderWidth: 2,
-                fill: true
-            }, {
-                label: 'Wygrane',
-                data: [0, 3, 8, 12, 13, 35, 36, 41],
-                backgroundColor: [
-                    'rgba(185, 246, 202, 1)'
-                ],
-                borderColor: [
-                    '#00C853'
-                ],
-                borderWidth: 2,
-                fill: true
-            }, {
-                label: 'Liczba longów',
-                data: [0, 5, 10, 20, 21, 55, 60, 71],
-                backgroundColor: [
-                    '#81D4FA'
-                ],
-                borderColor: [
-                    '#01579B'
-                ],
-                borderWidth: 2,
-                fill: true
-            }]
+      type: 'line',
+      data: {
+        labels: longDateRanges,
+        datasets: [{
+          label: 'Przegrane',
+          data: longLosses,
+          backgroundColor: [
+            'rgba(255, 138, 128, 1)'
+          ],
+          borderColor: [
+            '#FF1744'
+          ],
+          borderWidth: 2,
+          fill: true
+        }, {
+          label: 'Wygrane',
+          data: longWins,
+          backgroundColor: [
+            'rgba(185, 246, 202, 1)'
+          ],
+          borderColor: [
+            '#00C853'
+          ],
+          borderWidth: 2,
+          fill: true
+        }, {
+          label: 'Liczba longów',
+          data: allLongs,
+          backgroundColor: [
+            '#81D4FA'
+          ],
+          borderColor: [
+            '#01579B'
+          ],
+          borderWidth: 2,
+          fill: true
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'LONGI'
         },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true
-                    }
-                }]
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
             }
+          }]
         }
+      }
     });
     var ctx2 = document.getElementById("shortChart").getContext('2d');
     var myChart2 = new Chart(ctx2, {
-        type: 'line',
-        data: {
-            labels: ["2015-01", "2015-07", "2016-01", "2016-07", "2017-01", "2017-07", "2018-01", "2018-07"],
-            datasets: [{
-                label: 'Przegrane',
-                data: [0, 2, 2, 8, 8, 20, 24, 30],
-                backgroundColor: [
-                      'rgba(255, 138, 128, 1)'
-                ],
-                borderColor: [
-                    '#FF1744'
-                ],
-                borderWidth: 2,
-                fill: true
-            }, {
-                label: 'Wygrane',
-                data: [0, 3, 8, 12, 13, 35, 36, 41],
-                backgroundColor: [
-                    'rgba(185, 246, 202, 1)'
-                ],
-                borderColor: [
-                    '#00C853'
-                ],
-                borderWidth: 2,
-                fill: true
-            }, {
-                label: 'Liczba shortów',
-                data: [0, 5, 10, 20, 21, 55, 60, 71],
-                backgroundColor: [
-                    '#81D4FA'
-                ],
-                borderColor: [
-                    '#01579B'
-                ],
-                borderWidth: 2,
-                fill: true
-            }]
+      type: 'line',
+      data: {
+        labels: shortDateRanges,
+        datasets: [{
+          label: 'Przegrane',
+          data: shortLosses,
+          backgroundColor: [
+            'rgba(255, 138, 128, 1)'
+          ],
+          borderColor: [
+            '#FF1744'
+          ],
+          borderWidth: 2,
+          fill: true
+        }, {
+          label: 'Wygrane',
+          data: shortWins,
+          backgroundColor: [
+            'rgba(185, 246, 202, 1)'
+          ],
+          borderColor: [
+            '#00C853'
+          ],
+          borderWidth: 2,
+          fill: true
+        }, {
+          label: 'Liczba shortów',
+          data: allShorts,
+          backgroundColor: [
+            '#81D4FA'
+          ],
+          borderColor: [
+            '#01579B'
+          ],
+          borderWidth: 2,
+          fill: true
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'SHORTY'
         },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true
-                    }
-                }]
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
             }
+          }]
         }
+      }
     });
-    </script>
 
-  </body>
+    var ctx3 = document.getElementById("longChart2").getContext('2d');
+    var myChart3 = new Chart(ctx3, {
+      type: 'line',
+      data: {
+        labels: longDateRanges,
+        datasets: [{
+          label: 'Win ratio',
+          data: longsRatio,
+          backgroundColor: [
+            'rgba(185, 246, 202, 1)'
+          ],
+          borderColor: [
+            '#00C853'
+          ],
+          borderWidth: 2,
+          fill: true
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'LONGI'
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
+
+    var ctx4 = document.getElementById("shortChart2").getContext('2d');
+    var myChart4 = new Chart(ctx4, {
+      type: 'line',
+      data: {
+        labels: shortDateRanges,
+        datasets: [{
+          label: 'Win ratio',
+          data: shortsRatio,
+          backgroundColor: [
+            'rgba(185, 246, 202, 1)'
+          ],
+          borderColor: [
+            '#00C853'
+          ],
+          borderWidth: 2,
+          fill: true
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'SHORTY'
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
+
+    var ctx5 = document.getElementById("balanceChart").getContext('2d');
+    var myChart5 = new Chart(ctx5, {
+      type: 'line',
+      data: {
+        labels: dateRanges,
+        datasets: [{
+          label: 'Long balance',
+          data: longsBalance,
+          backgroundColor: [
+            'rgba(185, 246, 202, 1)'
+          ],
+          borderColor: [
+            '#00C853'
+          ],
+          borderWidth: 2,
+          fill: false
+        }, {
+          label: 'Short balance',
+          data: shortsBalance,
+          backgroundColor: [
+            'rgba(255, 138, 128, 1)'
+          ],
+          borderColor: [
+            '#FF1744'
+          ],
+          borderWidth: 2,
+          fill: false
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'SHORTY'
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
+  </script>
+
+</body>
+
 </html>
